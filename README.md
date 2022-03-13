@@ -80,7 +80,7 @@ useEffect(()=>{
 },[geo])
 ```
 ### 필요한 데이터 가공
-대시보드에 표시될 수치 데이터입니다. `reduce`함수를 사용해서 원하는 분류들을 새 배열에 넣어주고 `map`함수로 한가지 분류로만 이루어진 배열을 만듭니다.
+표시될 기상 데이터입니다. 필요한 데이터를 원하는 배열로 만들기위해 주로 `reduce`, `map` 함수가 사용되었습니다.
 ```javascript
 const name = geo?.[0].name
 const mainDt = new Date((data2.current?.dt - 32400 + data2.timezone_offset) * 1000).toString().slice(16, 18)
@@ -145,97 +145,117 @@ const dailyDt = dailyData?.map(function(item){
   return day
 })
 ```
-차트에 들어갈 데이터입니다. 동일하게 `reduce`와 `map`함수로 분류별로 정리해줍니다.
-```javascript
-const arr = Data.reduce(function(acc, cur){
-    const currentDate = new Date(cur.Date);
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const date = currentDate.getDate();
-    const confirmed = cur.Confirmed;
-    const active = cur.Active;
-    const deaths = cur.Deaths;
-    const recovered = cur.Recovered;
-    if(date === 1){
-      acc.push({year, month, date, confirmed, active, deaths, recovered, currentDate:cur.Date})
-    }
-  return acc;
-}, [])
-const confirmed = arr.map(function(item){
-  return item.confirmed;
-})
-const recentConfirmed = cardConfirmed.slice(-9, -1);
-const getToday = recentConfirmed.map(function(item, index, array){
-    const arr = array[index+1]-array[index];
-  return arr
-})
-const recentMovement =getToday.slice(0,7);
-const active = arr.map(function(item){
-  return item.active;
-})
-const deaths = arr.map(function(item){
-  return item.deaths;
-})
-const recovered = arr.map(function(item){
-  return item.recovered;
-})
-const currentDate = arr.map(function(item){
-  return item.currentDate;
-})
-```
 ### 차트에 데이터 넣기
-`apexcharts` 라이브러리를 사용한 area 차트입니다. 분류해놓은 배열들이 각각 data에 들어갑니다. 차트 옵션중에서는 `yaxis`->`labes` 단위를 1000명기준으로 변경했습니다.
+`apexcharts` 라이브러리를 사용한 area 차트입니다. 분류해놓은 배열들이 각각 data에 들어갑니다.
 ```javascript
-const series1 = [{
-  name: '확진자',
-  data: confirmed
-}, {
-  name: '격리자',
-  data: active
-}];
-const series2 = [{
-  name: '사망자',
-  data: deaths
-}]
-const series3 = [{
-  name: '일일 확진자',
-  data: recentMovement
-}];
 const options = {
-  chart: {
-    height: 350,
-    type: 'area',
-    toolbar: {
-      show: false}
-  },
-  dataLabels: {
-    enabled: false
-  },
-  stroke: {
-    curve: 'smooth'
-  },
-  xaxis: {
-    type: 'datetime',
-    categories: currentDate
-  },
-  yaxis: {
-    labels: {
-      formatter: function (value) {
-        return value/1000 + "K";
+    chart: {
+      type: 'line',
+      toolbar: {
+        show: false,
+      },
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: function(val){
+        return val +'°'
       }
     },
-  },
-  tooltip: {
-    x: {
-      format: 'yy/MM/dd'
+    series: [{
+      name: 'Temp',
+      data: hourlyTemp?.slice(0,12)
+    }],
+    xaxis: {
+      categories: hour?.slice(0,12)
     },
-    y: {
-      formatter: function(value) {
-        return value
-      }
+    yaxis: {
+      show: false,
+    },
+    stroke: {
+      show: true
     }
-  },
-}
+  }
+  const options2 = {
+    chart: {
+      type: 'line',
+      toolbar: {
+        show: false,
+      }
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: function(val){
+        return val +'%'
+      }
+    },
+    series: [{
+      name: 'Pop',
+      data: hourlyPop?.slice(0,12)
+    }],
+    xaxis: {
+      categories: hour?.slice(0,12)
+    },
+    yaxis: {
+      show: false,
+    },
+    stroke: {
+      show: true
+    }
+  }
+  const options3 = {
+    chart: {
+      type: 'bar',
+      toolbar: {
+        show: false,
+      }
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: function(val){
+        return val +'%'
+      }
+    },
+    series: [{
+      name: 'Humidity',
+      data: hourlyHumidity?.slice(0,12)
+    }],
+    xaxis: {
+      categories: hour?.slice(0,12)
+    },
+    yaxis: {
+      show: false,
+    },
+    stroke: {
+      show: false
+    }
+  }
+  const options4 = {
+    chart: {
+      type: 'bar',
+      toolbar: {
+        show: false,
+      }
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: function(val){
+        return val +'m/s'
+      }
+    },
+    series: [{
+      name: 'Wind',
+      data: hourlyWindSpeed?.slice(0,12)
+    }],
+    xaxis: {
+      categories: hour?.slice(0,12)
+    },
+    yaxis: {
+      show: false,
+    },
+    stroke: {
+      show: false
+    }
+  }
 ```
 
 ## 사용한 라이브러리
