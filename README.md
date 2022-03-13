@@ -49,7 +49,7 @@ return(
 ```
 
 ### Axios로 좌표 데이터 가져오기
-axios로 입력한 도시의 좌표 데이터를 가져옵니다. 도시명이 바뀔 때 마다 실행됩니다. 없는 도시일 경우 `alert`이 뜹니다.
+`useEffect`는 axios로 입력한 도시의 좌표 데이터를 가져옵니다. 도시명이 바뀔 때 마다 실행됩니다. 없는 도시일 경우 `alert`이 뜹니다.
 ```javascript
 useEffect(()=>{
     axios.get(`https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${key}`)
@@ -63,7 +63,7 @@ useEffect(()=>{
   },[city])
 ```
 ### Axios로 날씨 데이터 가져오기
-가져온 좌표 데이터로 날씨 데이터를 가져옵니다. 좌표가 달라질 때 마다 실행됩니다.
+`useEffect`는 가져온 좌표 데이터로 날씨 데이터를 가져옵니다. 좌표가 달라질 때 마다 실행됩니다.
 ```javascript
 useEffect(()=>{
   axios.all
