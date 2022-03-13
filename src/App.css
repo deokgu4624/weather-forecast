@@ -70,3 +70,8 @@ section{
   margin-top: 20px;
   justify-content: right;
 }
+@media (min-width: 992px){
+  .weekly {
+    flex: 1 1 auto;
+  }
+}

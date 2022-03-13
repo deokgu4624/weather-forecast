@@ -350,10 +350,10 @@ function App() {
       </section>
       <section>
         <h4>Daily Forecast</h4>
-        <Row className={'justify-content-center'}>
+        <Row>
           {dailyWeather?.map(function(item, index){
             return (
-              <Col xs={3} md={1}>
+              <Col xs={4} sm={3} lg={1} className={'weekly'}>
                 <Card className={'daily'} key={index} >
                   <Card.Body className={'dailyBorder'}>
                   {(dailyDt?.[index])}
