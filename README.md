@@ -1,70 +1,242 @@
-# Getting Started with Create React App
+# 일기예보 웹사이트
+https://weather-forecast12.netlify.app/
+## 목차
+1. [개요](#개요)
+2. [과정](#과정)  
+  2.1. [Axios로 도시 이름 검색](#axios로-데이터-받아오기)  
+  2.2. [필요한 데이터 가공](#필요한-데이터-가공)  
+  2.3. [차트에 데이터 넣기](#차트에-데이터-넣기)  
+  2.4. [표 만들기](#표-만들기)  
+  2.5. [번역](#번역)  
+3. [사용한 라이브러리](#사용한-라이브러리)
+## 개요
+React, Axios, Openweather API를 사용한 일기예보 웹사이트입니다. 도시별 현재 기상정보, 시간별 예보, 주간 예보 기능이 있습니다. 
+![제목 없음](https://user-images.githubusercontent.com/37141223/158065057-78aa1ceb-4f7d-4d0b-b668-e64f632a01dc.png)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+시간별 기온 차트입니다.
+![제목 없음](https://user-images.githubusercontent.com/37141223/158065610-41a24f69-67f6-429c-ac89-f2036dda13e4.png)
 
-## Available Scripts
+시간별 강수 확률 차트입니다.
+![제목 없음](https://user-images.githubusercontent.com/37141223/158065219-4f6368a3-0c2f-4dbd-bf79-715b1a6490ed.png)
 
-In the project directory, you can run:
+시간별 습도 차트입니다.
+![제목 없음](https://user-images.githubusercontent.com/37141223/158065490-2c5deda1-da1e-4bd3-ba25-524d826b90fe.png)
 
-### `npm start`
+시간별 바람 차트입니다.
+![제목 없음](https://user-images.githubusercontent.com/37141223/158065561-3c1fc70d-966e-4d33-89d2-d7d404c5f4ad.png)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+주간 예보 입니다.
+![제목 없음](https://user-images.githubusercontent.com/37141223/158065702-0895691b-da94-4bf9-a4c9-2511771931b3.png)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 과정
+### Axios로 도시 이름 검색
+도시를 입력 후 엔터나 검색을 클릭하면 `useState`를 사용해서 입력한 값이 `city` 변수로 들어갑니다.
+```javascript
+const onChange =(e)=>{
+    setText(e.target.value);
+}
+const handleKeyPress = e => {
+  if(e.key === 'Enter') {
+    setCity(text)
+  }
+}
+return(
+<InputGroup className="mb-3">
+  <Form.Control onChange={onChange} onKeyPress={handleKeyPress}/>
+  <InputGroup.Text id="basic-addon1" className={'search'} onClick={()=>{setCity(text)}}>Search🔍</InputGroup.Text>
+</InputGroup>
+)
+```
 
-### `npm test`
+### 좌표 데이터 가져오기
+axios로 입력한 도시의 좌표 데이터를 가져옵니다. 도시명이 바뀔 때 마다 실행됩니다. 없는 도시일 경우 `alert`이 뜹니다.
+```javascript
+useEffect(()=>{
+    axios.get(`https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${key}`)
+          .then(res =>{
+            setGeo(res.data);
+          })
+          .catch(function(error){
+            alert('옳지 않은 도시이름입니다. 영어로 입력해주세요. ex) london');
+            window.location.href = "/"
+          })
+  },[city])
+```
+### 날씨 데이터 가져오기
+가져온 좌표 데이터로 날씨 데이터를 가져옵니다. 좌표가 달라질 때 마다 실행됩니다.
+```javascript
+useEffect(()=>{
+  axios.all
+  ([
+    axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${geo?.[0].lat}&lon=${geo?.[0].lon}&appid=${key}`),
+    axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${geo?.[0].lat}&lon=${geo?.[0].lon}&appid=${key}`)
+  ])
+          .then(
+            axios.spread((res1, res2) => {
+              setData(res1.data)
+              setData2(res2.data)
+            })
+          )
+},[geo])
+```
+### 필요한 데이터 가공
+대시보드에 표시될 수치 데이터입니다. `reduce`함수를 사용해서 원하는 분류들을 새 배열에 넣어주고 `map`함수로 한가지 분류로만 이루어진 배열을 만듭니다.
+```javascript
+const name = geo?.[0].name
+const mainDt = new Date((data2.current?.dt - 32400 + data2.timezone_offset) * 1000).toString().slice(16, 18)
+const weatherMain = data.weather?.[0].main
+const temp = Math.round(data.main?.temp - 273.15)
+const feelsLike = Math.round(data.main?.feels_like - 273.15)
+const tempMin = Math.round(data.main?.temp_min - 273.15)
+const tempMax = Math.round(data.main?.temp_max - 273.15)
+const pressure = data.main?.pressure
+const humidity = data.main?.humidity
+const windSpeed = data.wind?.speed
+const windDegree = data.wind?.deg
+const sunrise = new Date(data.sys?.sunrise * 1000).toString().slice(16, 21)
+const sunset = new Date(data.sys?.sunset * 1000).toString().slice(16, 21)
+const axios = require('axios').default;
+const key = '7c2906c41e397f1c8d1db41f311949b2'
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+const hourlyData = data2.hourly?.reduce(function(acc, cur){
+  const dt = cur.dt;
+  const temp = cur.temp;
+  const pop = cur.pop
+  const windSpeed = cur.wind_speed;
+  const humidity = cur.humidity
+  acc.push({dt, temp, pop, windSpeed, humidity})
+  return acc
+}, [])
+const hour = hourlyData?.map(function(item){
+  return new Date((item.dt - 32400 + data2.timezone_offset) * 1000).toString().slice(16,18);
+})
+const hourlyTemp = hourlyData?.map(function(item){
+  return Math.round(item.temp - 273.15)
+})
+const hourlyPop = hourlyData?.map(function(item){
+  return item.pop * 100
+})
+const hourlyHumidity = hourlyData?.map(function(item){
+  return item.humidity
+})
+const hourlyWindSpeed = hourlyData?.map(function(item){
+  return item.windSpeed
+})
 
-### `npm run build`
+const dailyData = data2.daily?.reduce(function(acc, cur){
+  const dt = cur.dt;
+  const tempMax = cur.temp.max;
+  const tempMin = cur.temp.min;
+  const weather = cur.weather[0].main;
+  acc.push({dt, tempMax, tempMin, weather})
+  return acc;
+}, [])
+const dailyWeather = dailyData?.map(function(item){
+  return item.weather;
+})
+const dailyTempMax = dailyData?.map(function(item){
+  return Math.round(item.tempMax - 273.15)
+})
+const dailyTempMin = dailyData?.map(function(item){
+  return Math.round(item.tempMin - 273.15)
+})
+const dailyDt = dailyData?.map(function(item){
+  const day = new Date(item.dt * 1000).toString().slice(0, 3);
+  return day
+})
+```
+차트에 들어갈 데이터입니다. 동일하게 `reduce`와 `map`함수로 분류별로 정리해줍니다.
+```javascript
+const arr = Data.reduce(function(acc, cur){
+    const currentDate = new Date(cur.Date);
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const date = currentDate.getDate();
+    const confirmed = cur.Confirmed;
+    const active = cur.Active;
+    const deaths = cur.Deaths;
+    const recovered = cur.Recovered;
+    if(date === 1){
+      acc.push({year, month, date, confirmed, active, deaths, recovered, currentDate:cur.Date})
+    }
+  return acc;
+}, [])
+const confirmed = arr.map(function(item){
+  return item.confirmed;
+})
+const recentConfirmed = cardConfirmed.slice(-9, -1);
+const getToday = recentConfirmed.map(function(item, index, array){
+    const arr = array[index+1]-array[index];
+  return arr
+})
+const recentMovement =getToday.slice(0,7);
+const active = arr.map(function(item){
+  return item.active;
+})
+const deaths = arr.map(function(item){
+  return item.deaths;
+})
+const recovered = arr.map(function(item){
+  return item.recovered;
+})
+const currentDate = arr.map(function(item){
+  return item.currentDate;
+})
+```
+### 차트에 데이터 넣기
+`apexcharts` 라이브러리를 사용한 area 차트입니다. 분류해놓은 배열들이 각각 data에 들어갑니다. 차트 옵션중에서는 `yaxis`->`labes` 단위를 1000명기준으로 변경했습니다.
+```javascript
+const series1 = [{
+  name: '확진자',
+  data: confirmed
+}, {
+  name: '격리자',
+  data: active
+}];
+const series2 = [{
+  name: '사망자',
+  data: deaths
+}]
+const series3 = [{
+  name: '일일 확진자',
+  data: recentMovement
+}];
+const options = {
+  chart: {
+    height: 350,
+    type: 'area',
+    toolbar: {
+      show: false}
+  },
+  dataLabels: {
+    enabled: false
+  },
+  stroke: {
+    curve: 'smooth'
+  },
+  xaxis: {
+    type: 'datetime',
+    categories: currentDate
+  },
+  yaxis: {
+    labels: {
+      formatter: function (value) {
+        return value/1000 + "K";
+      }
+    },
+  },
+  tooltip: {
+    x: {
+      format: 'yy/MM/dd'
+    },
+    y: {
+      formatter: function(value) {
+        return value
+      }
+    }
+  },
+}
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 사용한 라이브러리
+`react` `axios` `react-bootstrap` `apexcharts`
