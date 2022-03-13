@@ -1,38 +1,72 @@
-.App {
+@import url(//fonts.googleapis.com/earlyaccess/nanumgothic.css);
+
+html, body{
+  font-family: 'Nanum Gothic', sans-serif;
+  background-color: rgb(241, 245, 255);
+}
+.mainWeather{
+  background: rgb(175,218,240);
+  background: linear-gradient(129deg, rgba(175,218,240,1) 0%, rgba(131,174,243,1) 24%, rgba(113,156,244,1) 47%, rgba(95,138,245,1) 78%);
+}
+h1{
+  color: white;
+  font-size: 80px;
+  font-weight: bold;
+  text-align: center;
+}
+h3{
+  color: white;
+  text-align: center;
+}
+h4{
+  text-align: center;
+}
+section{
+  margin-bottom: 20px;
+}
+.card{
+  border-radius: 8px;
+  border: none;
+  margin: 10px 0;
+}
+.daily{
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.dailyImg{
+  width: 100%;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.tabs{
+  cursor: pointer;
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.category{
+  opacity: .3;
+}
+.sub{
+  background-color: transparent;
   color: white;
+  text-align: center;
 }
-
-.App-link {
-  color: #61dafb;
+.subWrapper{
+  display: flex;
+  flex-wrap: wrap;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.imgWrapper{
+  display: flex;
+  justify-content: center;
+}
+.menuWrapper{
+  display: flex;
+  justify-content: space-evenly;
+}
+.dailyBorder{
+  border-style: 1px black;
+}
+.search{
+  cursor: pointer;
+}
+.inputWrapper{
+  display: flex;
+  margin-top: 20px;
+  justify-content: right;
 }
